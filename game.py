@@ -42,14 +42,7 @@ class Battleship:
                 return
 
             ai_pos = self.ai.choose()
-
-            # representation consistent through the whole flow.
-            try:
-                ar, ac = map(int, ai_pos.split(","))
-                player_pos = (ar, ac)
-            except ValueError:
-                player_pos = None
-            if player_pos is not None:
-                print("AI fired at", ai_pos)
-                if player_pos in self.player.ships:
-                    print("AI scored a hit.")
+            ar, ac = ai_pos
+            print("AI fired at", f"{ar + 1},{ac + 1}")
+            if ai_pos in self.player.ships:
+                print("AI scored a hit")
