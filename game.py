@@ -60,15 +60,19 @@ class Battleship:
                 return
 
             ai_pos = self.ai.choose()
+
+            if ai_pos is None:
+                print("AI has no remaining moves.")
+                return
+
             ar, ac = ai_pos
             print("AI fired at", f"{ar + 1},{ac + 1}")
 
-            if ai_pos in self.player.shots:
-                print("AI already fired there.")
-            else:
+            if any(ai_pos in ship for ship in self.player.ships):
+                print("AI scored a hit")
                 self.player.shots.add(ai_pos)
-
-                if any(ai_pos in ship for ship in self.player.ships):
-                    print("AI scored a hit")
-                else:
-                    print("AI missed")
+                self.ai.record_result(ai_pos, True)
+            else:
+                print("AI missed")
+                self.player.shots.add(ai_pos)
+                self.ai.record_result(ai_pos, False)
