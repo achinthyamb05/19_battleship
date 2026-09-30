@@ -10,33 +10,51 @@ class Battleship:
         self._setup()
 
     def _setup(self):
+        # Player fleet
         self.player.place_ship({(1, 1), (1, 2), (1, 3)})
+        self.player.place_ship({(4, 1), (4, 2)})
+
+        # Enemy fleet
         self.enemy.place_ship({(2, 2), (2, 3), (2, 4)})
+        self.enemy.place_ship({(4, 4), (4, 5)})
 
     def show(self):
         print("\nYour shots are coordinates like 2,3.")
-        print("Ship cells remaining:", len(self.enemy.ships - self.player.shots))
+        remaining = sum(
+            len(ship - self.enemy.shots)
+            for ship in self.enemy.ships
+        )
+        print("Ship cells remaining:", remaining)
 
     def run(self):
         print("Battleship")
+
         while True:
             self.show()
+
             raw = input("> ").strip().lower()
+
             if raw == "q":
                 return
+
             try:
                 r, c = map(int, raw.split(","))
                 pos = (r - 1, c - 1)
             except ValueError:
                 print("Use row,col.")
                 continue
+
             if not (0 <= pos[0] < Board.SIZE and 0 <= pos[1] < Board.SIZE):
                 print("Outside board.")
                 continue
-            if pos in self.player.shots:
+
+            if pos in self.enemy.shots:
                 print("Already fired there.")
                 continue
-            print("HIT!" if self.enemy.fire(pos) else "MISS!")
+
+            hit = self.enemy.fire(pos)
+            print("HIT!" if hit else "MISS!")
+
             if self.enemy.all_sunk():
                 print("You sank the fleet.")
                 return
@@ -44,5 +62,13 @@ class Battleship:
             ai_pos = self.ai.choose()
             ar, ac = ai_pos
             print("AI fired at", f"{ar + 1},{ac + 1}")
-            if ai_pos in self.player.ships:
-                print("AI scored a hit")
+
+            if ai_pos in self.player.shots:
+                print("AI already fired there.")
+            else:
+                self.player.shots.add(ai_pos)
+
+                if any(ai_pos in ship for ship in self.player.ships):
+                    print("AI scored a hit")
+                else:
+                    print("AI missed")
