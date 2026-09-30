@@ -20,10 +20,12 @@ class Battleship:
 
     def show(self):
         print("\nYour shots are coordinates like 2,3.")
+
         remaining = sum(
             len(ship - self.enemy.shots)
             for ship in self.enemy.ships
         )
+
         print("Ship cells remaining:", remaining)
 
     def run(self):
@@ -44,7 +46,8 @@ class Battleship:
                 print("Use row,col.")
                 continue
 
-            if not (0 <= pos[0] < Board.SIZE and 0 <= pos[1] < Board.SIZE):
+            if not (0 <= pos[0] < Board.SIZE and
+                    0 <= pos[1] < Board.SIZE):
                 print("Outside board.")
                 continue
 
@@ -52,13 +55,22 @@ class Battleship:
                 print("Already fired there.")
                 continue
 
+            # Player fires at enemy
             hit = self.enemy.fire(pos)
-            print("HIT!" if hit else "MISS!")
+
+            if hit:
+                print("HIT!")
+
+                if self.enemy.ship_sunk(pos):
+                    print("You sank a ship.")
+            else:
+                print("MISS!")
 
             if self.enemy.all_sunk():
                 print("You sank the fleet.")
                 return
 
+            # AI fires at player
             ai_pos = self.ai.choose()
 
             if ai_pos is None:
@@ -72,6 +84,9 @@ class Battleship:
                 print("AI scored a hit")
                 self.player.shots.add(ai_pos)
                 self.ai.record_result(ai_pos, True)
+
+                if self.player.ship_sunk(ai_pos):
+                    print("AI sank your ship.")
             else:
                 print("AI missed")
                 self.player.shots.add(ai_pos)
